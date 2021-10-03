@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  yclogui:
+    image: yclogui
+    build:
+      context: .
+      dockerfile: ./.docker/backend/Dockerfile
+    ports:
+      - "1323:1323"

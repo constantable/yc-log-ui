@@ -3,6 +3,7 @@ FROM golang:alpine AS builder
 RUN apk add --no-cache build-base
 WORKDIR /go/src/app
 COPY backend/. .
+COPY backend/.env /go/bin/app/.env
 RUN go get -d -v ./...
 RUN go build -o /go/bin/app -v ./main.go
 

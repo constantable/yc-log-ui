@@ -1,0 +1,20 @@
+.log
+  .log--time,
+  .log--level,
+  .log--json,
+  .log--msg
+    &::before
+      content: attr(title) ': '
+      @apply text-$typography-secondary opacity-50
+  & > div + div
+    @apply mt-[4px]
+  @media (min-width: 768px)
+    @apply grid grid-cols-[150px,100px,40px,1fr] gap-x-[16px]
+    .log--time,
+    .log--level,
+    .log--json,
+    .log--msg
+      &::before
+        content: none
+
+

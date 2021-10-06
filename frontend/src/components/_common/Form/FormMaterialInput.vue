@@ -3,7 +3,7 @@ import { ref, Ref, computed, ComputedRef } from 'vue'
 
 const props = defineProps({
   modelValue: {
-    type: [String, Number],
+    type: String,
     default: '',
   },
   id: {

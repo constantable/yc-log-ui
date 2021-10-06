@@ -4,7 +4,7 @@ const isOnline = useOnline()
 </script>
 
 <template>
-  <button>
+  <button class="button">
     <icon-carbon:wifi v-if="isOnline" />
     <icon-carbon:wifi-off v-else />
   </button>

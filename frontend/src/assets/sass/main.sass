@@ -1,0 +1,21 @@
+@import '_root'
+@import '_reset'
+
+*,
+::before,
+::after
+  -webkit-tap-highlight-color: transparent
+  @apply border-$secondary
+
+html
+  @apply bg-$document
+
+body
+  font-family: 'Rubik', sans-serif
+  @apply text-[14px] lg:text-[16px] text-$typography-common
+  &.is-blocked
+    @apply overflow-hidden
+
+/* Components */
+@import '_buttons'
+@import '_forms'

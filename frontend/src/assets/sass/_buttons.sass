@@ -1,0 +1,14 @@
+button,
+.button
+  font-weight: inherit
+  @apply focus:outline-none
+
+button,
+.button
+  @apply z-1
+  &:focus
+    box-shadow: 0 0 0 .2rem var(--primary)
+
+button:not(.clear),
+.button:not(.clear)
+  @apply inline-flex min-w-[32px] min-h-[32px] p-[6px] justify-center items-center text-center rounded-[4px] bg-$secondary

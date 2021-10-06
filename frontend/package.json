@@ -1,0 +1,44 @@
+{
+  "name": "yc-log-ui",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "serve": "vite preview"
+  },
+  "engines": {
+    "node": ">=14.x.x",
+    "npm": ">=6.x.x"
+  },
+  "dependencies": {
+    "@vueuse/core": "^6.5.3",
+    "@vueuse/head": "^0.6.0",
+    "axios": "^0.22.0",
+    "pinia": "^2.0.0-rc.10",
+    "vue": "^3.2.19",
+    "vue-i18n": "^9.2.0-beta.11",
+    "vue-router": "^4.0.11"
+  },
+  "devDependencies": {
+    "@iconify/json": "^1.1.411",
+    "@intlify/vite-plugin-vue-i18n": "^2.4.0",
+    "@types/node": "^16.10.3",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "@vitejs/plugin-vue": "^1.9.3",
+    "@vue/compiler-sfc": "^3.2.19",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^7.19.1",
+    "eslint-plugin-vuejs-accessibility": "^0.7.1",
+    "rollup-plugin-visualizer": "^5.5.2",
+    "sass": "^1.42.1",
+    "typescript": "^4.4.3",
+    "unplugin-icons": "^0.12.10",
+    "unplugin-vue-components": "^0.15.6",
+    "vite": "^2.6.3",
+    "vite-plugin-windicss": "^1.4.9",
+    "vue-tsc": "^0.3.0"
+  }
+}

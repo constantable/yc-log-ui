@@ -1,0 +1,11 @@
+{
+  "hello": "Hello",
+  "login": "Login",
+  "submit": "Submit",
+  "success": "Success",
+  "error": "Error",
+  "logs": "Logs",
+  "time": "Time",
+  "level": "Level",
+  "message": "Message"
+}

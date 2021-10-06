@@ -1,10 +1,46 @@
 <script setup lang="ts">
-import { ref, Ref } from 'vue'
+import { ref, Ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAuth } from '@/stores/auth'
+import axios from '@/plugins/axios'
+import { errorToast } from '@/use/useToast'
 
 const { t } = useI18n()
+const store = useAuth()
+
+const logs: Ref<Array<any>> = ref([])
+const isLoading: Ref<boolean> = ref(false)
+const getData = async() => {
+  console.log('🦕 getData')
+  isLoading.value = true
+  try {
+    const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/api/logs', {
+      'levels': [],
+      'filter': '',
+      'since': 1632608612,
+      'until': 1634612212,
+      'limit': 100,
+    }, store.getAuthHeaders)
+    // @ts-ignore
+    logs.value = response.data.entries
+    isLoading.value = false
+  } catch (err) {
+    console.error('🦕', err)
+    errorToast(`🦕 ${t('error')}`)
+    isLoading.value = false
+  }
+}
 
 const isOpenJsonModal: Ref<boolean> = ref(false)
+const currentJson: Ref<any> = ref(null)
+const handleJsonModal = (json: any) => {
+  currentJson.value = json
+  isOpenJsonModal.value = true
+}
+
+onMounted(async() => {
+  await getData()
+})
 </script>
 
 <template>
@@ -97,24 +133,27 @@ const isOpenJsonModal: Ref<boolean> = ref(false)
           Загрузить 100 предыдущие записей
         </button>
       </div>
-      <ul>
+      <div v-if="isLoading">
+        <p>isLoading</p>
+      </div>
+      <ul v-else>
         <li
-          v-for="i in 100"
-          :key="i"
+          v-for="log in logs"
+          :key="log.uid"
           class="log border-t border-$secondary px-[16px] py-[8px]"
         >
           <div
             :title="t('time')"
             class="log--time"
           >
-            2017
+            {{ log.timestamp.seconds }}
           </div>
           <div
             :title="t('level')"
             class="log--level"
           >
             <p class="inline text-$primary">
-              INFO
+              {{ log.level }}
             </p>
           </div>
           <div
@@ -123,7 +162,7 @@ const isOpenJsonModal: Ref<boolean> = ref(false)
           >
             <button
               class="button"
-              @click="isOpenJsonModal = true"
+              @click="handleJsonModal(log.json_payload)"
             >
               <icon-carbon:view />
             </button>
@@ -132,7 +171,7 @@ const isOpenJsonModal: Ref<boolean> = ref(false)
             :title="t('message')"
             class="log--msg"
           >
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptate aliquid blanditiis nihil, quibusdam voluptatibus consequatur enim odit labore dignissimos placeat officia quia voluptatem. Incidunt nihil, itaque magnam dolor tempore excepturi!
+            {{ log.message }}
           </div>
         </li>
       </ul>
@@ -141,7 +180,9 @@ const isOpenJsonModal: Ref<boolean> = ref(false)
 
   <ModalDefault v-model="isOpenJsonModal">
     <section class="relative rounded-[4px] overflow-hidden">
-      <CodeBlock />
+      <CodeBlock lang="json">
+        {{ currentJson }}
+      </CodeBlock>
     </section>
   </ModalDefault>
 </template>

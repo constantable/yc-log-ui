@@ -30,11 +30,11 @@ export const useAuth = defineStore('auth', {
   }),
   getters: {
     isAuthenticated(): boolean {
-      return this.refresh_token.trim().length > 0 && check15Min(this.last_refresh)
+      return this.access_token.trim().length > 0 && check15Min(this.last_refresh)
     },
     getAuthHeaders(): any {
       return {
-        headers: { Authorization: `Bearer ${this.refresh_token}` },
+        headers: { Authorization: `Bearer ${this.access_token}` },
       }
     },
   },

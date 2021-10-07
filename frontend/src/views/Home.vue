@@ -7,7 +7,7 @@ import { errorToast } from '@/use/useToast'
 
 const { t } = useI18n()
 const store = useAuth()
-
+const levels: Ref<Array<string>> = ref(["", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"])
 const logs: Ref<Array<any>> = ref([])
 const isLoading: Ref<boolean> = ref(false)
 const getData = async() => {
@@ -37,7 +37,6 @@ const handleJsonModal = (json: any) => {
   currentJson.value = json
   isOpenJsonModal.value = true
 }
-
 onMounted(async() => {
   await getData()
 })
@@ -130,7 +129,7 @@ onMounted(async() => {
     <section class="w-full">
       <div class="px-[16px] py-[8px] text-center">
         <button class="button">
-          Загрузить 100 предыдущие записей
+          Загрузить 100 предыдущих записей
         </button>
       </div>
       <div v-if="isLoading">
@@ -152,8 +151,8 @@ onMounted(async() => {
             :title="t('level')"
             class="log--level"
           >
-            <p class="inline text-$primary">
-              {{ log.level }}
+            <p :class="'level-' + levels[log.level]">
+              {{ levels[log.level] }}
             </p>
           </div>
           <div
@@ -179,7 +178,7 @@ onMounted(async() => {
   </main>
 
   <ModalDefault v-model="isOpenJsonModal">
-    <section class="relative rounded-[4px] overflow-hidden">
+    <section class="relative rounded-[4px] overflow-scroll max-h-[75%]">
       <CodeBlock lang="json">
         {{ currentJson }}
       </CodeBlock>

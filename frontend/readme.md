@@ -4,5 +4,5 @@
 ## requires:
 - nodejs >= 14
 
-## recomentded ide:
+## recommended ide:
 - vscode

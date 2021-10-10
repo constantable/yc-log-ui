@@ -39,11 +39,13 @@ const handleSubmit = async(): Promise<void> => {
         @submit.prevent="handleSubmit"
       >
         <FormMaterialInput
+          id="username"
           v-model="form.username"
           placeholder="Username"
           required
         />
         <FormMaterialInput
+          id="password"
           v-model="form.password"
           placeholder="Password"
           type="password"

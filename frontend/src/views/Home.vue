@@ -1,25 +1,49 @@
 <script setup lang="ts">
-import { ref, Ref, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useAuth } from '@/stores/auth'
+import {onMounted, Ref, ref} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {useAuth} from '@/stores/auth'
 import axios from '@/plugins/axios'
-import { errorToast } from '@/use/useToast'
+import {errorToast} from '@/use/useToast'
+import dayjs from 'dayjs'
+
+import LocalizedFormat from 'dayjs/plugin/localizedFormat';
+dayjs.locale('ru');
+dayjs.extend(LocalizedFormat)
+
+interface LogTime{
+  nanos: number;
+  seconds: number;
+}
+interface Log {
+  ingested_at: LogTime;
+  json_payload: any;
+  level: number;
+  message: string;
+  resource: any;
+  saved_at: LogTime;
+  timestamp: LogTime;
+  uid: string;
+}
 
 const { t } = useI18n()
 const store = useAuth()
 const levels: Ref<Array<string>> = ref(["", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"])
-const logs: Ref<Array<any>> = ref([])
+const logs: Ref<Array<Log>> = ref([])
 const isLoading: Ref<boolean> = ref(false)
+
+const filter: Ref<string> = ref("")
+const limit: Ref<number> = ref(100)
+
 const getData = async() => {
   console.log('🦕 getData')
   isLoading.value = true
   try {
     const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/api/logs', {
       'levels': [],
-      'filter': '',
+      'filter': filter.value,
       'since': 1632608612,
       'until': 1634612212,
-      'limit': 100,
+      'limit': limit.value,
     }, store.getAuthHeaders)
     // @ts-ignore
     logs.value = response.data.entries
@@ -53,15 +77,16 @@ onMounted(async() => {
           <label>
             <textarea
               rows="2"
+              v-model="filter"
               class="w-full rounded-[4px] bg-$secondary border-none p-[8px] focused"
             />
           </label>
         </div>
         <div>
           <label class="inline-flex items-center min-h-[27px] md:min-h-[36px] space-x-[8px] rounded-[4px] bg-$secondary px-[8px] py-[4px] mr-[8px] md:mr-[16px] mb-[8px]">
-            <p class="text-$typography-secondary">
+            <span class="text-$typography-secondary">
               {{ t('level') }}:
-            </p>
+            </span>
             <select
               class="flex-1 w-full bg-transparent"
             >
@@ -69,12 +94,13 @@ onMounted(async() => {
             </select>
           </label>
           <label class="inline-flex items-center min-h-[27px]  md:min-h-[36px] space-x-[8px] rounded-[4px] bg-$secondary px-[8px] py-[4px] mr-[8px] md:mr-[16px] mb-[8px]">
-            <p class="text-$typography-secondary">
+            <span class="text-$typography-secondary">
               Кол-во:
-            </p>
+            </span>
             <select
               class="flex-1 w-full bg-transparent"
             >
+              <option>50</option>
               <option>100</option>
             </select>
           </label>
@@ -111,12 +137,15 @@ onMounted(async() => {
           </button>
         </div>
       </div>
-      <div class="pt-[16px] hidden md:grid grid-cols-[150px,100px,40px,1fr] gap-x-[16px]">
+      <div class="pt-[16px] hidden md:grid grid-cols-[150px,100px,200px,40px,1fr] gap-x-[10px]">
         <div>
           {{ t('time') }}
         </div>
         <div>
           {{ t('level') }}
+        </div>
+        <div>
+          {{ t('label') }}
         </div>
         <div>
           Json
@@ -129,7 +158,7 @@ onMounted(async() => {
     <section class="w-full">
       <div class="px-[16px] py-[8px] text-center">
         <button class="button">
-          Загрузить 100 предыдущих записей
+          Загрузить предыдущие записи
         </button>
       </div>
       <div v-if="isLoading">
@@ -142,13 +171,11 @@ onMounted(async() => {
           class="log border-t border-$secondary px-[16px] py-[8px]"
         >
           <div
-            :title="t('time')"
             class="log--time"
           >
-            {{ log.timestamp.seconds }}
+            {{ dayjs.unix(log.timestamp.seconds).format('DD.MM.YYYY HH:mm:ss') }}
           </div>
           <div
-            :title="t('level')"
             class="log--level"
           >
             <p :class="'level-' + levels[log.level]">
@@ -156,7 +183,19 @@ onMounted(async() => {
             </p>
           </div>
           <div
-            title="Json"
+            class="log--label"
+          >
+            <template v-if="log.json_payload.kubernetes.labels.app">
+            app: {{ log.json_payload.kubernetes.labels.app}}
+            </template>
+            <template v-else-if="log.json_payload.kubernetes.labels.app">
+              run: {{ log.json_payload.kubernetes.labels.run}}
+            </template>
+            <template v-else-if="log.json_payload.kubernetes.labels.app">
+              job: {{ log.json_payload.kubernetes.labels.job}}
+            </template>
+          </div>
+          <div
             class="log--json md:text-center"
           >
             <button
@@ -167,7 +206,6 @@ onMounted(async() => {
             </button>
           </div>
           <div
-            :title="t('message')"
             class="log--msg"
           >
             {{ log.message }}

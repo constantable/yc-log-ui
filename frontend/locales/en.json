@@ -7,5 +7,6 @@
   "logs": "Logs",
   "time": "Time",
   "level": "Level",
+  "label": "Source",
   "message": "Message"
 }

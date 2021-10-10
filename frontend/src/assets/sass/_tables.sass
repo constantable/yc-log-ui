@@ -1,6 +1,7 @@
 .log
   .log--time,
   .log--level,
+  .log--label,
   .log--json,
   .log--msg
     &::before
@@ -9,9 +10,10 @@
   & > div + div
     @apply mt-[4px]
   @media (min-width: 768px)
-    @apply grid grid-cols-[150px,100px,40px,1fr] gap-x-[16px]
+    @apply grid grid-cols-[150px,100px,200px,40px,1fr] gap-x-[10px]
     .log--time,
     .log--level,
+    .log--label,
     .log--json,
     .log--msg
       &::before

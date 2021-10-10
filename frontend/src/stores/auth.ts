@@ -22,8 +22,8 @@ const check15Min = (milliseconds: number | null): boolean => {
 
 export const useAuth = defineStore('auth', {
   state: (): IAuthState => ({
-    access_token: '',
-    refresh_token:  localStorage.getItem('refresh_token') || '',
+    access_token: localStorage.getItem('access_token') || '',
+    refresh_token: localStorage.getItem('refresh_token') || '',
     last_refresh: localStorage.getItem('last_refresh')
       ? Number(localStorage.getItem('last_refresh'))
       : null,
@@ -44,11 +44,12 @@ export const useAuth = defineStore('auth', {
       this.access_token = access_token
       this.refresh_token = refresh_token
       this.last_refresh = Date.now()
+      localStorage.setItem('access_token', access_token)
       localStorage.setItem('refresh_token', refresh_token)
       localStorage.setItem('last_refresh', String(this.last_refresh))
-      setTimeout(() => {
-        this.refresh()
-      }, MIN15)
+      // setTimeout(() => {
+      //   this.refresh()
+      // }, MIN15)
     },
     login(data: IAuthForm): Promise<any> {
       return new Promise((resolve, reject) => {

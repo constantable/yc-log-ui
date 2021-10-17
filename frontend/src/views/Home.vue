@@ -35,14 +35,13 @@ const filter: Ref<string> = ref("")
 const limit: Ref<number> = ref(100)
 
 const getData = async() => {
-  console.log('🦕 getData')
   isLoading.value = true
   try {
     const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/api/logs', {
       'levels': [],
       'filter': filter.value,
-      'since': 1632608612,
-      'until': 1634612212,
+      'since': Math.floor(Date.now() / 1000) - 3600,
+      'until': Math.floor(Date.now() / 1000),
       'limit': limit.value,
     }, store.getAuthHeaders)
     // @ts-ignore
@@ -79,6 +78,7 @@ onMounted(async() => {
               rows="2"
               v-model="filter"
               class="w-full rounded-[4px] bg-$secondary border-none p-[8px] focused"
+              @blur="getData()"
             />
           </label>
         </div>
@@ -188,10 +188,10 @@ onMounted(async() => {
             <template v-if="log.json_payload.kubernetes.labels.app">
             app: {{ log.json_payload.kubernetes.labels.app}}
             </template>
-            <template v-else-if="log.json_payload.kubernetes.labels.app">
+            <template v-else-if="log.json_payload.kubernetes.labels.run">
               run: {{ log.json_payload.kubernetes.labels.run}}
             </template>
-            <template v-else-if="log.json_payload.kubernetes.labels.app">
+            <template v-else-if="log.json_payload.kubernetes.labels.job">
               job: {{ log.json_payload.kubernetes.labels.job}}
             </template>
           </div>

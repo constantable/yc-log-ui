@@ -2,7 +2,7 @@ FROM node:16-alpine as build-stage
 
 WORKDIR /app
 COPY frontend/. .
-RUN cp frontend/.env.prod .env
+RUN cp .env.prod .env
 RUN yarn
 RUN yarn build
 

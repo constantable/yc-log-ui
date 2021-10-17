@@ -1,0 +1,95 @@
+# Default values for yc-log-ui.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+nameOverride: ""
+fullnameOverride: ""
+imagePullSecrets: []
+
+frontend:
+  name: "yc-log-ui-frontend"
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/constantable/yc-log-ui-frontend
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  podAnnotations: {}
+  podSecurityContext: {}
+  # fsGroup: 2000
+  resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+#   memory: 128Mi
+backend:
+  name: "yc-log-ui-backend"
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/constantable/yc-log-ui-backend
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  podAnnotations: {}
+  podSecurityContext: {}
+    # fsGroup: 2000
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+  #   memory: 128Mi
+  parameters:
+    secret: "change_me"
+    dbfile: "/opt/yc-log-ui/db.sqlite3"
+    backend_port: 1323
+    service_account_id: ~
+    log_group_id: ~
+    public_key: ~
+    private_key: ~
+    key_id: ~
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port:
+    backend: 1323
+    frontend: 80
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: yc-log-ui.local
+      paths:
+      - path: /api.*
+        backend:
+          serviceName: yc-log-ui-backend
+          servicePort: 1323
+      - backend:
+          serviceName: yc-log-ui-frontend
+          servicePort: 80
+  tls:
+    - secretName: yc-log-ui-tls
+      hosts:
+        - yc-log-ui.local
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

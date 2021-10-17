@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "yc-log-ui.fullname" . }}-backend
+  labels:
+    {{- include "yc-log-ui.labels" . | nindent 4 }}-backend
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "yc-log-ui.selectorLabels" . | nindent 6 }}-backend
+  template:
+    metadata:
+      {{- with .Values.backend.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "yc-log-ui.selectorLabels" . | nindent 8 }}-backend
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.backend.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-backend
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          {{- include ".env.variables" . }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.parameters.backend_port }}
+              protocol: TCP
+{{/*          livenessProbe:*/}}
+{{/*            {{- toYaml .Values.liveness | nindent 12 }}*/}}
+{{/*          readinessProbe:*/}}
+{{/*            {{- toYaml .Values.readiness | nindent 12 }}*/}}
+{{/*          startupProbe:*/}}
+{{/*            {{- toYaml .Values.startupProbe | nindent 12 }}*/}}
+{{/*          resources:*/}}
+{{/*            {{- toYaml .Values.resources | nindent 12 }}*/}}
+          volumeMounts:
+            - name: yc-log-ui-db
+              mountPath: /opt/yc-log-ui
+      volumes:
+        - name: yc-log-ui-db
+          persistentVolumeClaim:
+            claimName: yc-log-ui-db
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: yc-log-ui-db
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+  storageClassName: "yc-network-hdd"

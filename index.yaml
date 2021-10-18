@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  yc-log-ui:
+  - apiVersion: v2
+    appVersion: v1.0.0
+    created: "2021-10-18T00:55:03.55617455Z"
+    description: A Helm chart for Kubernetes
+    digest: 45627e1614ec3266d108db258930371f76f6af1a12cca50b76680a5a20991115
+    name: yc-log-ui
+    type: application
+    urls:
+    - https://github.com/constantable/yc-log-ui/releases/download/yc-log-ui-0.1.0/yc-log-ui-0.1.0.tgz
+    version: 0.1.0
+generated: "2021-10-18T00:55:03.55618195Z"

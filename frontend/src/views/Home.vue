@@ -5,8 +5,9 @@ import {useAuth} from '@/stores/auth'
 import axios from '@/plugins/axios'
 import {errorToast} from '@/use/useToast'
 import dayjs from 'dayjs'
-
+import 'vue-skeletor/dist/vue-skeletor.css';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
+
 dayjs.locale('ru');
 dayjs.extend(LocalizedFormat)
 
@@ -32,26 +33,30 @@ const logs: Ref<Array<Log>> = ref([])
 const isLoading: Ref<boolean> = ref(false)
 
 const filter: Ref<string> = ref("")
-const limit: Ref<number> = ref(100)
+const seconds: Ref<number> = ref(3600)
+const levelSelected: Ref<number> = ref("")
+const limit: Ref<number> = ref(50)
 
-const getData = async() => {
+const getData = () => {
   isLoading.value = true
-  try {
-    const response = await axios.post(import.meta.env.VITE_BACKEND_URL + '/api/logs', {
-      'levels': [],
-      'filter': filter.value,
-      'since': Math.floor(Date.now() / 1000) - 3600,
-      'until': Math.floor(Date.now() / 1000),
-      'limit': limit.value,
-    }, store.getAuthHeaders)
-    // @ts-ignore
-    logs.value = response.data.entries
-    isLoading.value = false
-  } catch (err) {
-    console.error('🦕', err)
-    errorToast(`🦕 ${t('error')}`)
-    isLoading.value = false
-  }
+
+  axios.post(import.meta.env.VITE_BACKEND_URL + '/api/logs', {
+    'levels': Number.isInteger(parseInt(levelSelected.value)) ? [parseInt(levelSelected.value)] : [],
+    'filter': filter.value,
+    'since': Math.floor(Date.now() / 1000) - seconds.value,
+    'until': Math.floor(Date.now() / 1000),
+    'limit': limit.value,
+  }, store.getAuthHeaders)
+    .then((response) => {
+      // @ts-ignore
+      logs.value = response.data.entries
+      isLoading.value = false
+    })
+    .catch((err) => {
+      console.error('🦕', err)
+      errorToast(`🦕 ${t('error')}`)
+      isLoading.value = false
+    })
 }
 
 const isOpenJsonModal: Ref<boolean> = ref(false)
@@ -60,8 +65,8 @@ const handleJsonModal = (json: any) => {
   currentJson.value = json
   isOpenJsonModal.value = true
 }
-onMounted(async() => {
-  await getData()
+onMounted(() => {
+  getData()
 })
 </script>
 
@@ -69,15 +74,15 @@ onMounted(async() => {
   <main class="relative">
     <header class="sticky top-0 left-0 z-1 w-full bg-$document border-t border-b border-$secondary px-[16px] py-[8px]">
       <h1 class="mb-[8px]">
-        {{ t('logs') }}
+        {{ t('filter') }}
       </h1>
       <div class="space-y-[8px]">
         <div>
           <label>
             <textarea
-              rows="2"
               v-model="filter"
               class="w-full rounded-[4px] bg-$secondary border-none p-[8px] focused"
+              rows="2"
               @blur="getData()"
             />
           </label>
@@ -88,9 +93,18 @@ onMounted(async() => {
               {{ t('level') }}:
             </span>
             <select
+              v-model="levelSelected"
               class="flex-1 w-full bg-transparent"
+              @change="getData()"
             >
-              <option>Все</option>
+              <option value="">Все</option>
+              <option :value="1">TRACE</option>
+              <option :value="2">DEBUG</option>
+              <option :value="3">INFO</option>
+              <option :value="4">WARN</option>
+              <option :value="5">ERROR</option>
+              <option :value="6">FATAL</option>
+              <option :value="0">Нет</option>
             </select>
           </label>
           <label class="inline-flex items-center min-h-[27px]  md:min-h-[36px] space-x-[8px] rounded-[4px] bg-$secondary px-[8px] py-[4px] mr-[8px] md:mr-[16px] mb-[8px]">
@@ -98,34 +112,41 @@ onMounted(async() => {
               Кол-во:
             </span>
             <select
+              v-model="limit"
               class="flex-1 w-full bg-transparent"
+              @change="getData()"
             >
-              <option>50</option>
-              <option>100</option>
+              <option :value="50">50</option>
+              <option :value="100">100</option>
             </select>
           </label>
           <button
             class="button mr-[8px] md:mr-[16px] mb-[8px]"
+            @click.prevent="seconds = 3600;getData()"
           >
             1h
           </button>
           <button
             class="button mr-[8px] md:mr-[16px] mb-[8px]"
+            @click.prevent="seconds = 3*3600;getData()"
           >
             3h
           </button>
           <button
             class="button mr-[8px] md:mr-[16px] mb-[8px]"
+            @click.prevent="seconds = 24*3600;getData()"
           >
             1d
           </button>
           <button
             class="button mr-[8px] md:mr-[16px] mb-[8px]"
+            @click.prevent="seconds.value = 7*24*3600;getData()"
           >
             1w
           </button>
           <button
             class="button mr-[8px] md:mr-[16px] mb-[8px]"
+            @click.prevent="seconds.value = 2*7*24*3600;getData()"
           >
             2w
           </button>
@@ -156,13 +177,42 @@ onMounted(async() => {
       </div>
     </header>
     <section class="w-full">
-      <div class="px-[16px] py-[8px] text-center">
+      <div v-if="!isLoading" class="px-[16px] py-[8px] text-center">
         <button class="button">
           Загрузить предыдущие записи
         </button>
       </div>
       <div v-if="isLoading">
-        <p>isLoading</p>
+        <ul>
+          <li
+            v-for="n in 10"
+            :key="n"
+            class="log border-t border-$secondary px-[16px] py-[8px]"
+          >
+            <div
+              class="log--time"
+            >
+              <Skeletor />
+            </div>
+            <div
+              class="log--level"
+            >
+              <Skeletor />
+            </div>
+            <div
+              class="log--label"
+            >
+              <Skeletor />
+            </div>
+            <div
+            class="log--json md:text-center"
+            ></div>  <div
+            class="log--msg"
+          >
+            <Skeletor />
+          </div>
+          </li>
+        </ul>
       </div>
       <ul v-else>
         <li

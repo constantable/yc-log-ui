@@ -8,5 +8,6 @@
   "time": "Time",
   "level": "Level",
   "label": "Source",
-  "message": "Message"
+  "message": "Message",
+  "filter": "Filter"
 }

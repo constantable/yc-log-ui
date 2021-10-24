@@ -72,5 +72,5 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 100Mi
-  storageClassName: "yc-network-hdd"
+      storage: {{ .Values.backend.storageVolumeRequest }}
+  storageClassName: {{ .Values.backend.storageClassName }}

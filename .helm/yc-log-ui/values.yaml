@@ -27,7 +27,8 @@ frontend:
 backend:
   name: "yc-log-ui-backend"
   replicaCount: 1
-
+  storageClassName: "yc-network-hdd"
+  storageVolumeRequest: 100Mi
   image:
     repository: ghcr.io/constantable/yc-log-ui-backend
     pullPolicy: Always

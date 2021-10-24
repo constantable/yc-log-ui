@@ -34,7 +34,7 @@ const isLoading: Ref<boolean> = ref(false)
 
 const filter: Ref<string> = ref("")
 const seconds: Ref<number> = ref(3600)
-const levelSelected: Ref<number> = ref("")
+const levelSelected: Ref<string> = ref("")
 const limit: Ref<number> = ref(50)
 
 const getData = () => {
@@ -140,13 +140,13 @@ onMounted(() => {
           </button>
           <button
             class="button mr-[8px] md:mr-[16px] mb-[8px]"
-            @click.prevent="seconds.value = 7*24*3600;getData()"
+            @click.prevent="seconds = 7*24*3600;getData()"
           >
             1w
           </button>
           <button
             class="button mr-[8px] md:mr-[16px] mb-[8px]"
-            @click.prevent="seconds.value = 2*7*24*3600;getData()"
+            @click.prevent="seconds = 2*7*24*3600;getData()"
           >
             2w
           </button>

@@ -18,4 +18,4 @@
 .DS_Store
 *.sqlite3
 .env.local
-.helm/values*prod.yaml
+.helm/yc-log-ui/values*prod.yaml

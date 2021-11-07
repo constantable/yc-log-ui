@@ -1,0 +1,77 @@
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button,
+select
+  -webkit-appearance: none
+  margin: 0
+
+/* Firefox */
+input[type=number]
+  -moz-appearance: textfield
+
+select::-ms-expand
+  display: none
+
+input,
+textarea,
+select
+  font-weight: inherit
+
+input.focused,
+textarea.focused,
+select.focused
+  &:focus
+    outline: none
+    box-shadow: 0 0 0 .2rem var(--primary)
+
+
+.dropdown-item
+  display: block
+  width: 100%
+  padding: 0.25rem 1.5rem
+  clear: both
+  font-weight: 400
+  color: #212529
+  text-align: inherit
+  white-space: nowrap
+  background-color: transparent
+  border: 0
+
+
+.dropdown-menu.show
+  display: block
+
+
+.dropdown-menu
+  position: absolute
+  top: 100%
+  left: 0
+  z-index: 1000
+  display: none
+  float: left
+  min-width: 10rem
+  padding: 0.5rem 0
+  margin: 0.125rem 0 0
+  font-size: 1rem
+  color: var(--typography-common)
+  text-align: left
+  list-style: none
+  background-color: #fff
+  background-clip: padding-box
+  border: 1px
+  border-radius: 0.25rem
+
+.dropdown
+  position: relative
+
+.dropdown-item:focus,
+.dropdown-item:hover
+  color: #16181b
+  text-decoration: none
+  background-color: #f8f9fa
+
+.dropdown-item.active,
+.dropdown-item:active
+  color: #fff
+  text-decoration: none
+  background-color: var(--primary)

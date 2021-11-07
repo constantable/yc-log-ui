@@ -18,6 +18,7 @@
     "axios-auth-refresh": "^3.2.1",
     "dayjs": "^1.10.7",
     "highlight.js": "^11.2.0",
+    "jwt-decode": "^3.1.2",
     "mosha-vue-toastify": "^1.0.23",
     "pinia": "^2.0.0-rc.10",
     "vue": "^3.2.19",

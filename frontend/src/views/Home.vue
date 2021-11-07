@@ -5,10 +5,9 @@ import {useAuth} from '@/stores/auth'
 import axios from '@/plugins/axios'
 import {errorToast} from '@/use/useToast'
 import dayjs from 'dayjs'
-import 'vue-skeletor/dist/vue-skeletor.css';
-import LocalizedFormat from 'dayjs/plugin/localizedFormat';
+import LocalizedFormat from 'dayjs/plugin/localizedFormat'
 
-dayjs.locale('ru');
+dayjs.locale('ru')
 dayjs.extend(LocalizedFormat)
 
 interface LogTime{
@@ -28,13 +27,17 @@ interface Log {
 
 const { t } = useI18n()
 const store = useAuth()
-const levels: Ref<Array<string>> = ref(["", "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"])
+const levels: Ref<Array<string>> = ref(['', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'])
 const logs: Ref<Array<Log>> = ref([])
 const isLoading: Ref<boolean> = ref(false)
+const isLoadingBefore: Ref<boolean> = ref(false)
+const isLoadingAfter: Ref<boolean> = ref(false)
 
-const filter: Ref<string> = ref("")
+const filter: Ref<string> = ref('')
 const seconds: Ref<number> = ref(3600)
-const levelSelected: Ref<string> = ref("")
+const levelSelected: Ref<string> = ref('')
+const nextPageToken: Ref<string> = ref('')
+const previousPageToken: Ref<string> = ref('')
 const limit: Ref<number> = ref(50)
 
 const getData = () => {
@@ -50,6 +53,10 @@ const getData = () => {
     .then((response) => {
       // @ts-ignore
       logs.value = response.data.entries
+      // @ts-ignore
+      nextPageToken.value = response.data.next_page_token
+      // @ts-ignore
+      previousPageToken.value = response.data.previous_page_token
       isLoading.value = false
     })
     .catch((err) => {
@@ -58,7 +65,48 @@ const getData = () => {
       isLoading.value = false
     })
 }
-
+const loadPrevious = () => {
+  isLoadingBefore.value = true
+  axios.post(import.meta.env.VITE_BACKEND_URL + '/api/logs/page', {
+    'previous_page_token': previousPageToken.value,
+  }, store.getAuthHeaders)
+    .then((response) => {
+      // @ts-ignore
+      const entries = response.data.entries
+      logs.value = entries.concat(logs.value)
+      // @ts-ignore
+      previousPageToken.value = response.data.previous_page_token
+      isLoadingBefore.value = false
+    })
+    .catch((err) => {
+      console.error('🦕', err)
+      errorToast(`🦕 ${t('error')}`)
+      isLoadingBefore.value = false
+    })
+}
+const loadNext = () => {
+  isLoadingAfter.value = true
+  axios.post(import.meta.env.VITE_BACKEND_URL + '/api/logs/page', {
+    'next_page_token': nextPageToken.value,
+  }, store.getAuthHeaders)
+    .then((response) => {
+      // @ts-ignore
+      const entries = response.data.entries
+      logs.value = logs.value.concat(entries)
+      // @ts-ignore
+      nextPageToken.value = response.data.next_page_token
+      isLoadingAfter.value = false
+    })
+    .catch((err) => {
+      console.error('🦕', err)
+      errorToast(`🦕 ${t('error')}`)
+      isLoadingAfter.value = false
+    })
+}
+const filterSource = (label: string, labelVal: string) => {
+  filter.value = 'json_payload.kubernetes.labels.' + label + ': "' + labelVal + '"'
+  getData()
+}
 const isOpenJsonModal: Ref<boolean> = ref(false)
 const currentJson: Ref<any> = ref(null)
 const handleJsonModal = (json: any) => {
@@ -96,6 +144,7 @@ onMounted(() => {
               v-model="levelSelected"
               class="flex-1 w-full bg-transparent"
               @change="getData()"
+              @blur="getData()"
             >
               <option value="">Все</option>
               <option :value="1">TRACE</option>
@@ -109,12 +158,13 @@ onMounted(() => {
           </label>
           <label class="inline-flex items-center min-h-[27px]  md:min-h-[36px] space-x-[8px] rounded-[4px] bg-$secondary px-[8px] py-[4px] mr-[8px] md:mr-[16px] mb-[8px]">
             <span class="text-$typography-secondary">
-              Кол-во:
+              {{ t('limit') }}:
             </span>
             <select
               v-model="limit"
               class="flex-1 w-full bg-transparent"
               @change="getData()"
+              @blur="getData()"
             >
               <option :value="50">50</option>
               <option :value="100">100</option>
@@ -122,30 +172,35 @@ onMounted(() => {
           </label>
           <button
             class="button mr-[8px] md:mr-[16px] mb-[8px]"
+            :class="seconds === 3600?'active':''"
             @click.prevent="seconds = 3600;getData()"
           >
             1h
           </button>
           <button
             class="button mr-[8px] md:mr-[16px] mb-[8px]"
+            :class="seconds === 3*3600?'active':''"
             @click.prevent="seconds = 3*3600;getData()"
           >
             3h
           </button>
           <button
             class="button mr-[8px] md:mr-[16px] mb-[8px]"
+            :class="seconds === 24*3600?'active':''"
             @click.prevent="seconds = 24*3600;getData()"
           >
             1d
           </button>
           <button
             class="button mr-[8px] md:mr-[16px] mb-[8px]"
+            :class="seconds === 7*24*3600?'active':''"
             @click.prevent="seconds = 7*24*3600;getData()"
           >
             1w
           </button>
           <button
             class="button mr-[8px] md:mr-[16px] mb-[8px]"
+            :class="seconds === 2*7*24*3600?'active':''"
             @click.prevent="seconds = 2*7*24*3600;getData()"
           >
             2w
@@ -178,8 +233,8 @@ onMounted(() => {
     </header>
     <section class="w-full">
       <div v-if="!isLoading" class="px-[16px] py-[8px] text-center">
-        <button class="button">
-          Загрузить предыдущие записи
+        <button class="button" @click="loadPrevious">
+          {{ t('load-previous') }}
         </button>
       </div>
       <div v-if="isLoading">
@@ -205,12 +260,13 @@ onMounted(() => {
               <Skeletor />
             </div>
             <div
-            class="log--json md:text-center"
-            ></div>  <div
-            class="log--msg"
-          >
-            <Skeletor />
-          </div>
+              class="log--json md:text-center"
+            />
+            <div
+              class="log--msg"
+            >
+              <Skeletor />
+            </div>
           </li>
         </ul>
       </div>
@@ -236,13 +292,13 @@ onMounted(() => {
             class="log--label"
           >
             <template v-if="log.json_payload.kubernetes.labels.app">
-            app: {{ log.json_payload.kubernetes.labels.app}}
+              <a href="#" @click.prevent="filterSource('app',log.json_payload.kubernetes.labels.app)">app: {{ log.json_payload.kubernetes.labels.app }}</a>
             </template>
             <template v-else-if="log.json_payload.kubernetes.labels.run">
-              run: {{ log.json_payload.kubernetes.labels.run}}
+              <a href="#" @click.prevent="filterSource('run',log.json_payload.kubernetes.labels.run)">run: {{ log.json_payload.kubernetes.labels.run }}</a>
             </template>
             <template v-else-if="log.json_payload.kubernetes.labels.job">
-              job: {{ log.json_payload.kubernetes.labels.job}}
+              <a href="#" @click.prevent="filterSource('job',log.json_payload.kubernetes.labels.job)">job: {{ log.json_payload.kubernetes.labels.job }}</a>
             </template>
           </div>
           <div
@@ -252,7 +308,7 @@ onMounted(() => {
               class="button"
               @click="handleJsonModal(log.json_payload)"
             >
-              <icon-carbon:view />
+              <icon-carbon-view />
             </button>
           </div>
           <div
@@ -262,6 +318,11 @@ onMounted(() => {
           </div>
         </li>
       </ul>
+      <div v-if="!isLoading" class="px-[16px] py-[8px] text-center">
+        <button class="button" @click="loadNext">
+          {{ t('load-next') }}
+        </button>
+      </div>
     </section>
   </main>
 

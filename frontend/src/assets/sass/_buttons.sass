@@ -10,3 +10,9 @@ button,
 
 .button:not(.clear)
   @apply inline-flex min-w-[27px] min-h-[27px] md:min-w-[36px] md:min-h-[36px] p-[6px] justify-center items-center text-center rounded-[4px] bg-$secondary
+
+.button
+  &.active
+    outline: 2px solid transparent
+    outline-offset: 2px
+    box-shadow: 0 0 0 0.2rem var(--primary)

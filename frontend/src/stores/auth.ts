@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import axios from '@/plugins/axios'
+import jwt_decode from 'jwt-decode'
 
-const MIN15 = 900000 // 900000 milliseconds === 15 min
+const REFRESH_LIFETIME = 3600000*24*7
 
 export interface IAuthForm {
   username: string
@@ -13,11 +14,15 @@ export interface IAuthState {
   refresh_token: string
   last_refresh: number | null,
 }
-
-const check15Min = (milliseconds: number | null): boolean => {
+interface ITokenData{
+  admin: boolean
+  exp: number
+  username: string
+}
+const checkValidRefresh = (milliseconds: number | null): boolean => {
   if (!milliseconds) return false
   const now = Date.now()
-  return milliseconds + MIN15 > now //
+  return milliseconds + REFRESH_LIFETIME > now
 }
 
 export const useAuth = defineStore('auth', {
@@ -30,12 +35,19 @@ export const useAuth = defineStore('auth', {
   }),
   getters: {
     isAuthenticated(): boolean {
-      return this.access_token.trim().length > 0 && check15Min(this.last_refresh)
+      return this.access_token.trim().length > 0 && checkValidRefresh(this.last_refresh)
+    },
+    isAdmin(): boolean {
+      const decoded :ITokenData = jwt_decode(this.access_token.trim())
+      return decoded.admin
     },
     getAuthHeaders(): any {
       return {
         headers: { Authorization: `Bearer ${this.access_token}` },
       }
+    },
+    getRefreshToken(): string {
+      return this.refresh_token
     },
   },
   actions: {
@@ -47,9 +59,6 @@ export const useAuth = defineStore('auth', {
       localStorage.setItem('access_token', access_token)
       localStorage.setItem('refresh_token', refresh_token)
       localStorage.setItem('last_refresh', String(this.last_refresh))
-      // setTimeout(() => {
-      //   this.refresh()
-      // }, MIN15)
     },
     login(data: IAuthForm): Promise<any> {
       return new Promise((resolve, reject) => {
@@ -60,6 +69,14 @@ export const useAuth = defineStore('auth', {
           })
           .catch(err => reject(err))
       })
+    },
+    logout(): void {
+      this.access_token = ''
+      this.refresh_token = ''
+      this.last_refresh = 0
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('last_refresh')
     },
     refresh(): Promise<any> {
       return new Promise((resolve, reject) => {

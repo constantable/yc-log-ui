@@ -9,5 +9,11 @@
   "level": "Level",
   "label": "Source",
   "message": "Message",
+  "logout": "Logout",
+  "change-password": "Change password",
+  "users": "Users",
+  "limit": "Limit",
+  "load-previous": "Load previous records",
+  "load-next": "Load next records",
   "filter": "Filter"
 }

@@ -38,7 +38,7 @@ watch(isShow, (val) => {
     >
       <section v-if="modelValue" class="fixed z-11 top-0 left-0 w-full h-full flex flex-col justify-center px-[16px] bg-[rgba(0,0,0,.9)]">
         <button class="button absolute top-[14px] right-[14px] w-[32px] h-[32px] p-0 grid place-items-center text-[18px]" @click="onToggleModal(false)">
-          <icon-carbon:close />
+          <icon-carbon-close />
         </button>
         <div class="h-[60px]" />
         <slot />

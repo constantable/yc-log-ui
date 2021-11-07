@@ -3,7 +3,7 @@ import { ref, Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useAuth, IAuthForm } from '@/stores/auth'
-import { toast, errorToast } from '@/use/useToast'
+import { errorToast } from '@/use/useToast'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -19,8 +19,7 @@ const handleSubmit = async(): Promise<void> => {
   console.log('🦕 handleSubmit')
   try {
     await login(form.value)
-    router.push({ name: 'Home' })
-    toast(t('success'), 'success')
+    await router.push({name: 'Home'})
   } catch (err) {
     console.error('🦕', err)
     errorToast(`🦕 ${t('error')}`)
